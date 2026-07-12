@@ -145,7 +145,7 @@ def generate_astrology_calendar():
         # If the last aspect happened before the moon left the sign, it's Void of Course from that moment until ingress
         if transit['end'] - last_aspect > timedelta(minutes=15):
             e_voc = Event()
-            e_voc.name = f"❌ Void of Course Moon ({transit['sign'].split()[0]})"
+            e_voc.name = f"⚪️ Void of Course Moon ({transit['sign'].split()[0]})"
             e_voc.begin = last_aspect.strftime('%Y-%m-%d %H:%M:%S')
             e_voc.end = transit['end'].strftime('%Y-%m-%d %H:%M:%S')
             cal.events.add(e_voc)
