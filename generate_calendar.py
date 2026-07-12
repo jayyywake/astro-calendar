@@ -18,10 +18,11 @@ def generate_moon_calendar():
     cal = Calendar()
     moon = ephem.Moon()
     
-    # Start tracking from today
-    start_time = datetime.utcnow()
-    # Check positions for the next 30 days
-    end_time = start_time + timedelta(days=30)
+    # NEW: Start tracking from 30 days AGO so your recent past calendar history is preserved
+    start_time = datetime.utcnow() - timedelta(days=30)
+    
+    # NEW: Look 365 days into the future (plus the 30 days of past history)
+    end_time = datetime.utcnow() + timedelta(days=1800)
     
     current_time = start_time
     time_step = timedelta(hours=1)
@@ -30,35 +31,28 @@ def generate_moon_calendar():
     event_start = None
 
     while current_time <= end_time:
-        # Convert datetime to ephem date format
         ephem_date = ephem.Date(current_time)
-        
-        # Calculate Moon position relative to the Earth's orbit (Ecliptic)
         moon.compute(ephem_date)
         ecliptic_lon = ephem.Ecliptic(moon).lon
         
         current_sign = get_zodiac_sign(ecliptic_lon)
         
-        # If the sign changes, close out the previous event and start a new one
         if current_sign != last_sign:
             if last_sign is not None:
-                # Create the calendar event for the completed transit
                 e = Event()
                 e.name = f"Moon in {last_sign}"
                 e.begin = event_start.strftime('%Y-%m-%d %H:%M:%S')
                 e.end = current_time.strftime('%Y-%m-%d %H:%M:%S')
                 cal.events.add(e)
             
-            # Reset trackers for the new sign
             last_sign = current_sign
             event_start = current_time
             
         current_time += time_step
 
-    # Save the finalized calendar to a file
     with open("astrology.ics", "w") as f:
         f.writelines(cal.serialize())
-    print("Successfully generated astrology.ics!")
+    print("Successfully generated expanded 1-year astrology.ics!")
 
 if __name__ == "__main__":
     generate_moon_calendar()
